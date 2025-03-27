@@ -1,12 +1,13 @@
 <?php
-$conn = mysqli_connect("localhost", "root", "", "vulnerable_db");
+$db = new SQLite3('vulnerable.db');
 
 $search = $_GET['q'];
+// Vulnerable query
 $query = "SELECT * FROM users WHERE username LIKE '%$search%'";
-$result = mysqli_query($conn, $query);
+$result = $db->query($query);
 
 $users = [];
-while($row = mysqli_fetch_assoc($result)) {
+while($row = $result->fetchArray(SQLITE3_ASSOC)) {
     $users[] = $row;
 }
 

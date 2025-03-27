@@ -1,16 +1,16 @@
 <?php
-$conn = mysqli_connect("localhost", "root", "", "vulnerable_db");
+$db = new SQLite3('vulnerable.db');
 
-// Vulnerable login - NO SANITIZATION
+// Vulnerable login
 $username = $_POST['username'];
 $password = $_POST['password'];
 
+// Vulnerable query
 $query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
-$result = mysqli_query($conn, $query);
+$result = $db->query($query);
 
-if(mysqli_num_rows($result) > 0) {
-    $user = mysqli_fetch_assoc($result);
-    echo json_encode(['success' => true, 'user' => $user]);
+if($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    echo json_encode(['success' => true, 'user' => $row]);
 } else {
     echo json_encode(['success' => false]);
 }
