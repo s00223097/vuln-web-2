@@ -63,14 +63,23 @@
             const user = users.find(u => u.username === username && u.password === password);
             
             if (user) {
-                // Vulnerable: Storing session data in localStorage
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                // Vulnerable: Setting insecure session cookie
+                setSessionCookie(user);
                 window.location.href = 'profile.html';
             } else {
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('error').textContent = 'Invalid credentials';
             }
         });
+
+        // Vulnerable session management
+        function setSessionCookie(user) {
+            // Vulnerable: Storing sensitive data in cookies
+            // Vulnerable: No encryption
+            // Vulnerable: No HttpOnly flag
+            // Vulnerable: No Secure flag
+            document.cookie = `session=${JSON.stringify(user)}; path=/`;
+        }
     </script>
 </body>
 </html> 

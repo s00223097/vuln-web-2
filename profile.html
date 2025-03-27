@@ -39,6 +39,7 @@
     <div id="profileInfo" class="profile-info"></div>
     
     <button onclick="window.location.href='edit-profile.html'">Edit Profile</button>
+    <button onclick="logout()">Logout</button>
 
     <div class="search-section">
         <h2>Search Users</h2>
@@ -48,9 +49,34 @@
     </div>
 
     <script>
+        // Vulnerable session management
+        function setSessionCookie(user) {
+            // Vulnerable: Storing sensitive data in cookies
+            // Vulnerable: No encryption
+            // Vulnerable: No HttpOnly flag
+            // Vulnerable: No Secure flag
+            document.cookie = `session=${JSON.stringify(user)}; path=/`;
+        }
+
+        function getSessionCookie() {
+            // Vulnerable: No cookie validation
+            const cookies = document.cookie.split(';');
+            const sessionCookie = cookies.find(cookie => cookie.trim().startsWith('session='));
+            if (sessionCookie) {
+                return JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]));
+            }
+            return null;
+        }
+
+        function logout() {
+            // Vulnerable: No proper session termination
+            document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = 'index.html';
+        }
+
         function loadProfile() {
-            // Vulnerable: No session validation
-            const user = JSON.parse(localStorage.getItem('currentUser'));
+            // Vulnerable: Using cookies for session management
+            const user = getSessionCookie();
             
             if (!user) {
                 window.location.href = 'index.html';
