@@ -53,23 +53,24 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
             
-            // Vulnerable: Storing sensitive data in localStorage
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            
-            // Vulnerable: Plain text password comparison
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                // Vulnerable: Setting insecure session cookie
-                setSessionCookie(user);
-                window.location.href = 'profile.html';
-            } else {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = 'Invalid credentials';
-            }
+            fetch('login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    setSessionCookie(data.user);
+                    window.location.href = 'profile.html';
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = 'Invalid credentials';
+                }
+            });
         });
 
         // Vulnerable session management
