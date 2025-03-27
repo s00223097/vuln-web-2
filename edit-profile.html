@@ -72,32 +72,25 @@
         document.getElementById('editForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const newPassword = document.getElementById('newPassword').value;
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('password', document.getElementById('newPassword').value);
             
-            // Vulnerable: No input validation
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            
-            // Vulnerable: No proper user identification
-            const userIndex = users.findIndex(u => u.username === currentUser.username);
-            
-            if (userIndex !== -1) {
-                // Vulnerable: Direct object modification without validation
-                users[userIndex].username = username;
-                users[userIndex].email = email;
-                if (newPassword) {
-                    // Vulnerable: Plain text password storage
-                    users[userIndex].password = newPassword;
+            fetch('update_profile.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    setSessionCookie(data.user);
+                    window.location.href = 'profile.html';
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = data.message || 'Update failed';
                 }
-                
-                // Vulnerable: Storing sensitive data in localStorage
-                localStorage.setItem('users', JSON.stringify(users));
-                localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
-                
-                window.location.href = 'profile.html';
-            }
+            });
         });
 
         loadUserData();

@@ -57,38 +57,27 @@
     <p>Already have an account? <a href="index.html">Login here</a></p>
 
     <script>
-        // Intentionally vulnerable code
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const email = document.getElementById('email').value;
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+            formData.append('email', document.getElementById('email').value);
             
-            // Vulnerable: No password strength validation
-            // Vulnerable: No email validation
-            // Vulnerable: Client-side validation only
-            
-            if (password !== confirmPassword) {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = 'Passwords do not match';
-                return;
-            }
-            
-            // Vulnerable: Storing sensitive data in localStorage
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            
-            // Vulnerable: No username uniqueness check
-            // Vulnerable: Storing plain text passwords
-            users.push({
-                username,
-                password,
-                email
+            fetch('register.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = 'index.html';
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = data.message || 'Registration failed';
+                }
             });
-            
-            localStorage.setItem('users', JSON.stringify(users));
-            window.location.href = 'index.html';
         });
     </script>
 </body>

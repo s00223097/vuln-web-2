@@ -75,7 +75,6 @@
         }
 
         function loadProfile() {
-            // Vulnerable: Using cookies for session management
             const user = getSessionCookie();
             
             if (!user) {
@@ -90,26 +89,20 @@
             `;
         }
 
-        // Vulnerable: JavaScript injection through eval
         function searchUsers() {
             const searchTerm = document.getElementById('searchInput').value;
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
             
-            try {
-                const searchFilter = `user => 
-                    user.username.includes("${searchTerm}") || 
-                    user.email.includes("${searchTerm}")`;
-                const results = users.filter(eval(searchFilter));
-                
-                document.getElementById('searchResults').innerHTML = results.map(user => `
-                    <div>
-                        <h3>${user.username}</h3>
-                        <p>Email: ${user.email}</p>
-                    </div>
-                `).join('');
-            } catch(e) {
-                document.getElementById('searchResults').innerHTML = 'Search error';
-            }
+            // Vulnerable: Direct parameter injection
+            fetch(`search.php?q=${searchTerm}`)
+                .then(r => r.json())
+                .then(users => {
+                    document.getElementById('searchResults').innerHTML = users.map(user => `
+                        <div>
+                            <h3>${user.username}</h3>
+                            <p>Email: ${user.email}</p>
+                        </div>
+                    `).join('');
+                });
         }
 
         loadProfile();
