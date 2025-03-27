@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Vulnerable Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .error {
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Register</h1>
+    <div id="error" class="error"></div>
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="index.html">Login here</a></p>
+
+    <script>
+        // Intentionally vulnerable code
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const email = document.getElementById('email').value;
+            
+            // Vulnerable: No password strength validation
+            // Vulnerable: No email validation
+            // Vulnerable: Client-side validation only
+            
+            if (password !== confirmPassword) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Passwords do not match';
+                return;
+            }
+            
+            // Vulnerable: Storing sensitive data in localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Vulnerable: No username uniqueness check
+            // Vulnerable: Storing plain text passwords
+            users.push({
+                username,
+                password,
+                email
+            });
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html> 

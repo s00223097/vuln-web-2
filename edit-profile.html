@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Vulnerable Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .error {
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Profile</h1>
+    <div id="error" class="error"></div>
+    <form id="editForm">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="newPassword">New Password (leave blank to keep current):</label>
+            <input type="password" id="newPassword" name="newPassword">
+        </div>
+        <button type="submit">Save Changes</button>
+        <button type="button" onclick="window.location.href='profile.html'">Back to Profile</button>
+    </form>
+
+    <script>
+        // Intentionally vulnerable code
+        function loadUserData() {
+            // Vulnerable: No session validation
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Vulnerable: XSS vulnerability in value attribute
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+        }
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const newPassword = document.getElementById('newPassword').value;
+            
+            // Vulnerable: No input validation
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Vulnerable: No proper user identification
+            const userIndex = users.findIndex(u => u.username === currentUser.username);
+            
+            if (userIndex !== -1) {
+                // Vulnerable: Direct object modification without validation
+                users[userIndex].username = username;
+                users[userIndex].email = email;
+                if (newPassword) {
+                    // Vulnerable: Plain text password storage
+                    users[userIndex].password = newPassword;
+                }
+                
+                // Vulnerable: Storing sensitive data in localStorage
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
+                
+                window.location.href = 'profile.html';
+            }
+        });
+
+        loadUserData();
+    </script>
+</body>
+</html> 

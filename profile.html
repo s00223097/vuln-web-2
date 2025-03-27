@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Vulnerable Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-info {
+            margin-bottom: 20px;
+        }
+        .search-section {
+            margin-top: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #searchResults {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Profile</h1>
+    <div id="profileInfo" class="profile-info"></div>
+    
+    <button onclick="window.location.href='edit-profile.html'">Edit Profile</button>
+
+    <div class="search-section">
+        <h2>Search Users</h2>
+        <input type="text" id="searchInput" placeholder="Search by username">
+        <button onclick="searchUsers()">Search</button>
+        <div id="searchResults"></div>
+    </div>
+
+    <script>
+        // Intentionally vulnerable code
+        function loadProfile() {
+            // Vulnerable: No session validation
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Vulnerable: XSS vulnerability
+            document.getElementById('profileInfo').innerHTML = `
+                <h2>Welcome ${user.username}!</h2>
+                <p>Email: ${user.email}</p>
+                <p>Password: ${user.password}</p>
+            `;
+        }
+
+        // Vulnerable: No input sanitization
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Vulnerable: SQL injection-like vulnerability
+            const results = users.filter(user => 
+                user.username.includes(searchTerm) || 
+                user.email.includes(searchTerm)
+            );
+            
+            // Vulnerable: XSS vulnerability
+            document.getElementById('searchResults').innerHTML = results.map(user => `
+                <div>
+                    <h3>${user.username}</h3>
+                    <p>Email: ${user.email}</p>
+                    <p>Password: ${user.password}</p>
+                </div>
+            `).join('');
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html> 
