@@ -48,7 +48,6 @@
     </div>
 
     <script>
-        // Intentionally vulnerable code
         function loadProfile() {
             // Vulnerable: No session validation
             const user = JSON.parse(localStorage.getItem('currentUser'));
@@ -65,12 +64,11 @@
             `;
         }
 
-        // Vulnerable: No input sanitization
+        // Vulnerable: JavaScript injection through eval
         function searchUsers() {
             const searchTerm = document.getElementById('searchInput').value;
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             
-            // Vulnerable: JavaScript injection through eval
             try {
                 const searchFilter = `user => 
                     user.username.includes("${searchTerm}") || 
