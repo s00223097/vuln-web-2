@@ -62,7 +62,6 @@
             document.getElementById('profileInfo').innerHTML = `
                 <h2>Welcome ${user.username}!</h2>
                 <p>Email: ${user.email}</p>
-                <p>Password: ${user.password}</p>
             `;
         }
 
@@ -71,20 +70,22 @@
             const searchTerm = document.getElementById('searchInput').value;
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             
-            // Vulnerable: SQL injection-like vulnerability
-            const results = users.filter(user => 
-                user.username.includes(searchTerm) || 
-                user.email.includes(searchTerm)
-            );
-            
-            // Vulnerable: XSS vulnerability
-            document.getElementById('searchResults').innerHTML = results.map(user => `
-                <div>
-                    <h3>${user.username}</h3>
-                    <p>Email: ${user.email}</p>
-                    <p>Password: ${user.password}</p>
-                </div>
-            `).join('');
+            // Vulnerable: JavaScript injection through eval
+            try {
+                const searchFilter = `user => 
+                    user.username.includes("${searchTerm}") || 
+                    user.email.includes("${searchTerm}")`;
+                const results = users.filter(eval(searchFilter));
+                
+                document.getElementById('searchResults').innerHTML = results.map(user => `
+                    <div>
+                        <h3>${user.username}</h3>
+                        <p>Email: ${user.email}</p>
+                    </div>
+                `).join('');
+            } catch(e) {
+                document.getElementById('searchResults').innerHTML = 'Search error';
+            }
         }
 
         loadProfile();
