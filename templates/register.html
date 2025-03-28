@@ -60,22 +60,19 @@
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const formData = new FormData();
-            formData.append('username', document.getElementById('username').value);
-            formData.append('password', document.getElementById('password').value);
-            formData.append('email', document.getElementById('email').value);
+            const formData = new FormData(this);
             
-            fetch('register.php', {
+            fetch('/register', {
                 method: 'POST',
                 body: formData
             })
             .then(r => r.json())
             .then(data => {
                 if(data.success) {
-                    window.location.href = 'index.html';
+                    window.location.href = '/';
                 } else {
                     document.getElementById('error').style.display = 'block';
-                    document.getElementById('error').textContent = data.message || 'Registration failed';
+                    document.getElementById('error').textContent = 'Registration failed';
                 }
             });
         });
