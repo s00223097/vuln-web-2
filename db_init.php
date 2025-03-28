@@ -1,5 +1,5 @@
 <?php
-$db = new SQLite3('vulnerable.db');
+$db = new SQLite('vulnerable.db');
 
 // Create users table
 $db->exec('CREATE TABLE IF NOT EXISTS users (
