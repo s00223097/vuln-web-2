@@ -7,12 +7,12 @@ app = Flask(__name__)
 app.secret_key = 'vulnerable_secret_key'  # Intentionally weak for testing
 
 def init_db():
-    conn = sqlite3.connect('vulnerable.db')
+    conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  username TEXT,
-                  password TEXT,
+                  username TEXT UNIQUE NOT NULL,
+                  password TEXT NOT NULL,
                   email TEXT)''')
     # Add test users
     c.execute("INSERT OR IGNORE INTO users (username, password, email) VALUES (?, ?, ?)",
@@ -26,23 +26,15 @@ def init_db():
 def index():
     return render_template('index.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register')
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-        
-        # Vulnerable: No input validation
-        conn = sqlite3.connect('vulnerable.db')
-        c = conn.cursor()
-        # Vulnerable: SQL Injection possible
-        c.execute(f"INSERT INTO users (username, password, email) VALUES ('{username}', '{password}', '{email}')")
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True})
     return render_template('register.html')
+
+@app.route('/register', methods=['POST'])
+def register_post():
+    data = request.form
+    # Add your registration logic here
+    return jsonify({"success": True})
 
 @app.route('/login', methods=['POST'])
 def login():
